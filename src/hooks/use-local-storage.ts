@@ -4,9 +4,12 @@ import { useState, useEffect } from 'react';
 
 export default function useLocalStorage<ValueType>(key: string, defaultValue: ValueType) {
   const [value, setValue] = useState(() => {
-    const storedValue = localStorage.getItem(key);
+    if (typeof window !== 'undefined') {
+      const storedValue = localStorage.getItem(key);
+      return storedValue === null ? defaultValue : JSON.parse(storedValue);
+    }
 
-    return storedValue === null ? defaultValue : JSON.parse(storedValue);
+    return defaultValue;
   });
 
   useEffect(() => {

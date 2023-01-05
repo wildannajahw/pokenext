@@ -1,4 +1,5 @@
 import { GetStaticPathsResult, GetStaticPropsContext, GetStaticPropsResult } from 'next';
+import usePokemon from '../../hooks/use-pokemon';
 import { useQueryPokemon } from '../../queries/pokemon';
 
 type Context = GetStaticPropsContext<{ slug: [string] | [string, string] }>;
@@ -47,8 +48,16 @@ type Props = {
 
 const PokemonDetail = ({ pokemonSpecies, pokemonName }: Props) => {
   const pokemon = useQueryPokemon(pokemonSpecies).data!;
-  console.log(pokemon);
-  return <div>test</div>;
+  const { myPokemon, setMyPokemon } = usePokemon();
+  const onAdd = () => {
+    myPokemon ? setMyPokemon([...myPokemon, pokemon]) : setMyPokemon([pokemon]);
+  };
+  return (
+    <div>
+      {pokemon && <div>{pokemon.name}</div>}
+      <button onClick={onAdd}>add</button>
+    </div>
+  );
 };
 
 export default PokemonDetail;
