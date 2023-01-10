@@ -1,39 +1,42 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { useState, useEffect } from 'react';
 
 // ----------------------------------------------------------------------
 
 export default function useLocalStorage<ValueType>(key: string, defaultValue: ValueType) {
-  const [value, setValue] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const storedValue = localStorage.getItem(key);
-      return storedValue === null ? defaultValue : JSON.parse(storedValue);
-    }
+	const [value, setValue] = useState(() => {
+		if (typeof window !== 'undefined') {
+			const storedValue = localStorage.getItem(key);
+			return storedValue === null ? defaultValue : JSON.parse(storedValue);
+		}
 
-    return defaultValue;
-  });
+		return defaultValue;
+	});
 
-  useEffect(() => {
-    const listener = (e: StorageEvent) => {
-      if (e.storageArea === localStorage && e.key === key) {
-        setValue(e.newValue ? JSON.parse(e.newValue) : e.newValue);
-      }
-    };
-    window.addEventListener('storage', listener);
+	useEffect(() => {
+		const listener = (e: StorageEvent) => {
+			if (e.storageArea === localStorage && e.key === key) {
+				setValue(e.newValue ? JSON.parse(e.newValue) : e.newValue);
+			}
+		};
 
-    return () => {
-      window.removeEventListener('storage', listener);
-    };
-  }, [key, defaultValue]);
+		window.addEventListener('storage', listener);
 
-  const setValueInLocalStorage = (newValue: ValueType) => {
-    setValue((currentValue: ValueType) => {
-      const result = typeof newValue === 'function' ? newValue(currentValue) : newValue;
+		return () => {
+			window.removeEventListener('storage', listener);
+		};
+	}, [key, defaultValue]);
 
-      localStorage.setItem(key, JSON.stringify(result));
+	const setValueInLocalStorage = (newValue: ValueType) => {
+		setValue((currentValue: ValueType) => {
+			const result = typeof newValue === 'function' ? newValue(currentValue) : newValue;
 
-      return result;
-    });
-  };
+			localStorage.setItem(key, JSON.stringify(result));
 
-  return [value, setValueInLocalStorage];
+			return result;
+		});
+	};
+
+	return [value, setValueInLocalStorage];
 }
